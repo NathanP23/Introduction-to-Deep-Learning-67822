@@ -26,7 +26,8 @@ def setup_training(model, y_train):
     class_counts = torch.bincount(y_train)
     class_weights = 1.0 / (class_counts.float() + 1e-6)
     class_weights = class_weights / class_weights.sum()  # Normalize
-    
+    # we dont use weights yet
+
     loss_fn = nn.CrossEntropyLoss()
     
     # Optimizer: Adam (adaptive learning rate)
