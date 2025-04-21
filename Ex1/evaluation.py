@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 import plotly.offline as pyo
 
 
-def plot_training_results(train_losses, test_losses, accuracies, epochs):
+def plot_training_results(selected_allele, train_losses, test_losses, accuracies, epochs):
     """
     Create plots for training/test loss and test accuracy
     """
@@ -64,7 +64,7 @@ def plot_training_results(train_losses, test_losses, accuracies, epochs):
         hoverinfo="text"
     ))
     fig_loss.update_layout(
-        title="Train vs Test Loss",
+        title=f"Train vs Test Loss for {selected_allele}",
         xaxis=dict(title="Epoch", tickmode='array', tickvals=x_ticks, **axis_style),
         yaxis=dict(title="Loss", **axis_style),
         **layout_style
@@ -86,7 +86,7 @@ def plot_training_results(train_losses, test_losses, accuracies, epochs):
                       line=dict(color='orange', width=2, dash='dash'))
     
     fig_acc.update_layout(
-        title="Test Accuracy Over Time",
+        title="Test Accuracy Over Time for {selected_allele}",
         xaxis=dict(title="Epoch", tickmode='array', tickvals=x_ticks, **axis_style),
         yaxis=dict(title="Accuracy (%)", **axis_style),
         **layout_style
