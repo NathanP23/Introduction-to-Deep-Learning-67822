@@ -31,7 +31,6 @@ class PeptideClassifier(nn.Module):
         """
         return self.embedding(x)  # (B, 9, emb_dim)
 
-
 class PeptideClassifier2b(PeptideClassifier):
     """
     Standard feedforward classifier for 9-mer peptide sequences using fixed-width hidden layers.
@@ -71,7 +70,6 @@ class PeptideClassifier2b(PeptideClassifier):
         x = super().forward(x)  # (B, 9, emb_dim)
         return self.model(x)   # (B, 7)
 
-
 class PeptideClassifier2c(PeptideClassifier):
     """
     Advanced classifier for 9-mer peptide sequences using Tal architecture.
@@ -99,20 +97,66 @@ class PeptideClassifier2c(PeptideClassifier):
             nn.ReLU(),
             nn.Linear(FC_HIDDEN_DIM // 4, FC_HIDDEN_DIM // 8),
             nn.ReLU(),
-            nn.Linear(FC_HIDDEN_DIM // 8, NUM_CLASSES)
+            nn.Linear(FC_HIDDEN_DIM // 8, NUM_CLASSES),  # Single output neuron
+            nn.Sigmoid()  # Sigmoid for binary classification
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.embedding(x)
-        return self.model(x)
+        return self.model(x).squeeze(1)
+    
+class BinaryPeptideClassifier2b(PeptideClassifier):
+    def __init__(self, emb_dim=32):
+        super().__init__(emb_dim)
+        input_dim = PEPTIDE_LENGTH * self.emb_dim
+        self.model = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(input_dim, FC_HIDDEN_DIM),
+            nn.ReLU(),
+            nn.Linear(FC_HIDDEN_DIM, FC_HIDDEN_DIM),
+            nn.ReLU(),
+            nn.Linear(FC_HIDDEN_DIM, 1),  # Single output neuron
+            nn.Sigmoid()                  # Sigmoid for binary classification
+        )
 
+    def forward(self, x):
+        x = super().forward(x)
+        return self.model(x).squeeze(1)  # Squeeze to (B,)
+    
+class BinaryPeptideClassifier2c(PeptideClassifier):
+    def __init__(self, emb_dim=4, num_filters=16):
+        """
+        Initializes the advanced model layers.
+        Args:
+            emb_dim (int): Size of the embedding vector for each amino acid.
+        """
+        super().__init__(emb_dim)
+
+        self.model = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(PEPTIDE_LENGTH * emb_dim, FC_HIDDEN_DIM * 2),
+            nn.Sigmoid(),
+            nn.Linear(FC_HIDDEN_DIM * 2, FC_HIDDEN_DIM),
+            nn.ReLU(),
+            nn.Linear(FC_HIDDEN_DIM, FC_HIDDEN_DIM // 2),
+            nn.ReLU(),
+            nn.Linear(FC_HIDDEN_DIM // 2, FC_HIDDEN_DIM // 4),
+            nn.ReLU(),
+            nn.Linear(FC_HIDDEN_DIM // 4, FC_HIDDEN_DIM // 8),
+            nn.ReLU(),
+            nn.Linear(FC_HIDDEN_DIM // 8, 1),  # Single output neuron
+            nn.Sigmoid()  # Sigmoid for binary classification
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.embedding(x)
+        return self.model(x).squeeze(1)
 
 def save_model(model, filename='fc_model.pt'):
     """
     Save the trained model to a file
     """
     torch.save(model.state_dict(), filename)
-
 
 def load_model(model_class=PeptideClassifier2b, emb_dim=4, filename='fc_model.pt', **kwargs):
     """

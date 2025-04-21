@@ -75,18 +75,26 @@ def prepare_data(train_data, test_data):
     Convert data to PyTorch tensors
     """
     # Split features (X) and labels (y) for train and test
+    # X_train = [peptide_to_indices(p) for p, _, _ in train_data]
+    # y_train = [label for _, _, label in train_data]
+    
+    # X_test = [peptide_to_indices(p) for p, _, _ in test_data]
+    # y_test = [label for _, _, label in test_data]
     X_train = [peptide_to_indices(p) for p, _, _ in train_data]
-    y_train = [label for _, _, label in train_data]
-    
+    y_train = [0 if label == 0 else 1 for _, _, label in train_data]
+
     X_test = [peptide_to_indices(p) for p, _, _ in test_data]
-    y_test = [label for _, _, label in test_data]
+    y_test = [0 if label == 0 else 1 for _, _, label in test_data]
     
-    # Convert to tensors
+    # # Convert to tensors
+    # X_train = torch.tensor(X_train, dtype=torch.long)
+    # y_train = torch.tensor(y_train, dtype=torch.long)
+    # X_test = torch.tensor(X_test, dtype=torch.long)
+    # y_test = torch.tensor(y_test, dtype=torch.long)
     X_train = torch.tensor(X_train, dtype=torch.long)
-    y_train = torch.tensor(y_train, dtype=torch.long)
-    
+    y_train = torch.tensor(y_train, dtype=torch.float32)  # Float for binary
     X_test = torch.tensor(X_test, dtype=torch.long)
-    y_test = torch.tensor(y_test, dtype=torch.long)
+    y_test = torch.tensor(y_test, dtype=torch.float32)
     
     print("X_train shape:", X_train.shape)
     print("y_train shape:", y_train.shape)

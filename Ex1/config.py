@@ -14,7 +14,7 @@ FC_HIDDEN_DIM = 128
 
 # Training configuration
 EPOCHS = 20
-BATCH_SIZE = 64
+BATCH_SIZE = 8
 LEARNING_RATE = 1e-3
 
 # Amino acid representation
