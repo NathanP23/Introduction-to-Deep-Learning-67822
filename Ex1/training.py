@@ -1,9 +1,11 @@
-# training.py
+# ================================
+#          training.py
+# ================================
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 from config import BATCH_SIZE, LEARNING_RATE, EPOCHS, EMB_DIM
-from model import PeptideToHLAClassifier
+from model import PeptideToHLAClassifier_2C
 
 
 def create_data_loaders(X_train, y_train, X_test, y_test):
@@ -24,7 +26,7 @@ def setup_training(model, loss_function, learning_rate, y_train):
     Initialize loss function and optimizer
     """
     if loss_function == 'BCELoss':
-        # For the binary classifier (PeptideToHLAClassifier), use BCELoss
+        # For the binary classifier (PeptideToHLAClassifier_2C), use BCELoss
         loss_fn = nn.BCELoss()
     else:
         # For multi-class classifiers, use CrossEntropyLoss
@@ -49,7 +51,7 @@ def train_model(model, train_loader, test_loader, loss_fn, optimizer, epochs=EPO
     train_losses = []
     test_losses = []
     accuracies = []
-    is_binary = isinstance(model, PeptideToHLAClassifier)
+    is_binary = isinstance(model, PeptideToHLAClassifier_2C)
     
     # Training Loop
     for epoch in range(epochs):

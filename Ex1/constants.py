@@ -1,4 +1,6 @@
-# constants.py
+# ================================
+#          constants.py
+# ================================
 from config import AMINO_ACIDS
 
 # Allele to label mapping

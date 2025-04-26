@@ -1,6 +1,9 @@
+# ================================
+#          hyperparameters.py
+# ================================
 from config import *
 
-allelse_data_hyperparameters = {
+allele_data_hyperparameters = {
     'A0101': {
         'EMB_DIM': EMB_DIM,
         'FC_HIDDEN_DIM': FC_HIDDEN_DIM,

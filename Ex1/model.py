@@ -1,4 +1,6 @@
-# model.py
+# ================================
+#          model.py
+# ================================
 import torch
 import torch.nn as nn
 from config import PEPTIDE_LENGTH, NUM_AMINO_ACIDS, NUM_CLASSES, FC_HIDDEN_DIM, EMB_DIM
@@ -72,7 +74,7 @@ class PeptideClassifier2b(PeptideClassifier):
         return self.model(x)   # (B, 7)
 
 
-class PeptideToHLAClassifier(PeptideClassifier):
+class PeptideToHLAClassifier_2C(PeptideClassifier):
     """
     Binary classifier for 9-mer peptides specific to the A0201 allele.
     Takes a 9-mer peptide, embeds it, and outputs confidence (0-1) of peptide positivity.

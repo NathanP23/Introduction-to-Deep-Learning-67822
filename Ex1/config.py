@@ -1,4 +1,6 @@
-# config.py
+# ================================
+#          config.py
+# ================================
 from pathlib import Path
 
 # Data configuration

@@ -1,4 +1,6 @@
-# dataset.py
+# ================================
+#          dataset.py
+# ================================
 import os
 import random
 import torch
@@ -16,7 +18,10 @@ def print_dist(data, name):
     total = sum(counter.values())
     print(f"\n{name} set distribution:")
     for lbl in sorted(counter):
-        allele = [a for a, l in ALLELE_LABEL_MAP.items() if l == lbl][0]
+        if lbl == 1:
+            allele = name.split()[0]  # Use the allele from the dataset name
+        else:
+            allele = "NEG"
         print(f"  {allele:6s} (label {lbl}): {counter[lbl]} samples ({100 * counter[lbl]/total:.2f}%)")
 
 
