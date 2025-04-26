@@ -160,3 +160,48 @@ def load_model(model_class=PeptideClassifier2b, emb_dim=EMB_DIM, filename='fc_mo
     model.load_state_dict(torch.load(filename))
     model.eval()
     return model
+
+# ================================================================
+#  Multi-allele head – concatenates six already-trained binary nets
+# ================================================================
+class MultiAlleleEnsemble(nn.Module):
+    """
+    Wraps six PeptideToHLAClassifier_2C instances.
+    Forward(x) → tensor of shape (B, 6) in a **fixed alphabetical order**:
+        ['A0101', 'A0201', 'A0203', 'A0207', 'A0301', 'A2402']
+    """
+
+    DEFAULT_ORDER = ['A0101', 'A0201', 'A0203', 'A0207', 'A0301', 'A2402']
+
+    def __init__(self, allele_models: dict):
+        """
+        allele_models: {allele_name: trained PeptideToHLAClassifier_2C}
+                       **Must contain exactly the six keys above.**
+        """
+        super().__init__()
+        # Preserve order for deterministic output vector
+        self.allele_order = self.DEFAULT_ORDER
+        self.models = nn.ModuleDict(allele_models)
+
+    def forward(self, x):
+        # Each sub-model returns shape (B); stack→(6,B) then transpose→(B,6)
+        logits = [self.models[a](x) for a in self.allele_order]
+        return torch.stack(logits).T    # (B,6)
+
+
+# ------------------------------------------------------------
+def load_allele_models(checkpoint_map):
+    """
+    checkpoint_map: {allele_name: path_to_pt_file}
+    Returns a frozen MultiAlleleEnsemble ready for inference.
+    """
+    sub_models = {}
+    for allele, path in checkpoint_map.items():
+        m = load_model(PeptideToHLAClassifier_2C,
+                       emb_dim=EMB_DIM,
+                       filename=path,
+                       fc_hidden_dim=FC_HIDDEN_DIM)
+        sub_models[allele] = m
+    ensemble = MultiAlleleEnsemble(sub_models)
+    ensemble.eval()
+    return ensemble

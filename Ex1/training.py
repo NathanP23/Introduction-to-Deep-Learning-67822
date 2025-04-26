@@ -7,6 +7,17 @@ from torch.utils.data import DataLoader, TensorDataset
 from config import BATCH_SIZE, LEARNING_RATE, EPOCHS, EMB_DIM
 from model import PeptideToHLAClassifier_2C
 
+def _collect_outputs(model, loader):
+    """
+    Run `model` once over `loader` and return a single 1-D tensor
+    of the raw sigmoid outputs (length = number of samples).
+    """
+    model.eval()
+    outs = []
+    with torch.no_grad():
+        for x, _ in loader:
+            outs.append(model(x).cpu())
+    return torch.cat(outs)
 
 def create_data_loaders(X_train, y_train, X_test, y_test):
     """
@@ -43,7 +54,7 @@ def setup_training(model, loss_function, learning_rate, y_train):
     return loss_fn, optimizer
 
 
-def train_model(model, train_loader, test_loader, loss_fn, optimizer, epochs=EPOCHS, threshold=0.5):
+def train_model(model, train_loader, test_loader, loss_fn, optimizer, epochs=EPOCHS, threshold=0.5, return_final_outputs=False):
     """
     Training loop for the model
     """
@@ -117,5 +128,5 @@ def train_model(model, train_loader, test_loader, loss_fn, optimizer, epochs=EPO
               f"Train Loss: {epoch_train_loss:.4f} | "
               f"Test Loss: {epoch_test_loss:.4f} | "
               f"Accuracy: {epoch_accuracy:.2f}%")
-    
-    return train_losses, test_losses, accuracies
+    final_outputs = _collect_outputs(model, test_loader) if return_final_outputs else None
+    return train_losses, test_losses, accuracies, final_outputs

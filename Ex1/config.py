@@ -5,6 +5,7 @@ from pathlib import Path
 
 # Data configuration
 DATA_DIR = Path("Data/HLA_Dataset")
+MODELS_DIR = Path("Models")
 TRAIN_RATIO = 0.9
 
 # Model configuration
