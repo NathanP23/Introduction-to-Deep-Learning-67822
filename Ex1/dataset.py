@@ -1,29 +1,11 @@
 # ================================
 #          dataset.py
 # ================================
-import os
 import random
 import torch
-from pathlib import Path
 from collections import Counter
-from constants import ALLELE_LABEL_MAP, AA_TO_IDX
-from config import DATA_DIR, TRAIN_RATIO
-
-
-def print_dist(data, name):
-    """
-    Print distribution of labels in a dataset
-    """
-    counter = Counter([label for _, _, label in data])
-    total = sum(counter.values())
-    print(f"\n{name} set distribution:")
-    for lbl in sorted(counter):
-        if lbl == 1:
-            allele = name.split()[0]  # Use the allele from the dataset name
-        else:
-            allele = "NEG"
-        print(f"  {allele:6s} (label {lbl}): {counter[lbl]} samples ({100 * counter[lbl]/total:.2f}%)")
-
+from constants import AA_TO_IDX
+from config import TRAIN_RATIO, ALLELE_POSITIVE_FILES, NEGATIVE_FILE
 
 def load_and_split_data():
     """
@@ -31,14 +13,12 @@ def load_and_split_data():
     Returns 6 datasets, one for each positive allele, with binary classification (1 for positive, 0 for negative).
     Each dataset has independently shuffled negatives.
     """
-    # Locate all positive allele files
-    allele_files = [f for f in DATA_DIR.glob("*.txt") if "neg" not in f.name]
     
     # Dictionary to store data for each allele
     allele_data = {}
     
     # Process each allele file separately
-    for file in allele_files:
+    for file in ALLELE_POSITIVE_FILES:
         allele = file.stem.replace("_pos", "")
         with open(file) as f:
             peptides = [line.strip() for line in f if line.strip()]
@@ -50,7 +30,7 @@ def load_and_split_data():
             allele_data[allele] = {"train_pos": train_pos, "test_pos": test_pos}
     
     # Read all negative peptides once
-    with open(DATA_DIR / "negs.txt") as f:
+    with open(NEGATIVE_FILE) as f:
         neg_peptides = [line.strip() for line in f if line.strip()]
     
     # Create separate datasets for each allele
@@ -75,22 +55,42 @@ def load_and_split_data():
         
         # Store the final datasets
         datasets[allele] = (train_data, test_data)
-        
-        print(f"\n--- {allele} Dataset ---")
-        print(f"Train set size: {len(train_data)} ({((len(train_data) / (len(train_data) + len(test_data))) * 100):.2f}%))")
-        print(f"Test set size: {len(test_data)} ({((len(test_data) / (len(train_data) + len(test_data))) * 100):.2f}%)")
-        print_dist(train_data, f"{allele} Train")
-        print_dist(test_data, f"{allele} Test")
-    
+    summarize_datasets(datasets)
     return datasets
 
+import pandas as pd
+from collections import Counter
+import torch
 
-def peptide_to_indices(peptide):
+# Add this function at the end of dataset.py
+def summarize_datasets(datasets):
     """
-    Convert peptide (string of amino acids) to list of indices
+    Summarize datasets into a Pandas DataFrame
     """
-    return [AA_TO_IDX[aa] for aa in peptide]
+    summary_data = []
+    for allele, (train_data, test_data) in datasets.items():
+        train_counter = Counter([label for _, _, label in train_data])
+        test_counter = Counter([label for _, _, label in test_data])
+        
+        train_total = len(train_data)
+        test_total = len(test_data)
+        total = train_total + test_total
 
+        summary_data.append({
+            'Allele': allele,
+            'Train Size': train_total,
+            'Test Size': test_total,
+            'Train (%)': f"{100 * train_total / total:.2f}%",
+            'Test (%)': f"{100 * test_total / total:.2f}%",
+            'Train Positive (%)': f"{100 * train_counter[1] / train_total:.2f}%",
+            'Train Negative (%)': f"{100 * train_counter[0] / train_total:.2f}%",
+            'Test Positive (%)': f"{100 * test_counter[1] / test_total:.2f}%",
+            'Test Negative (%)': f"{100 * test_counter[0] / test_total:.2f}%"
+        })
+
+    summary_df = pd.DataFrame(summary_data)
+    print("Dataset Summary:")
+    print(summary_df)
 
 def prepare_data(datasets):
     """
@@ -106,9 +106,7 @@ def prepare_data(datasets):
     """
     processed_datasets = {}
     
-    for allele, (train_data, test_data) in datasets.items():
-        print(f"\n--- Processing {allele} Dataset ---")
-        
+    for allele, (train_data, test_data) in datasets.items():        
         # Split features (X) and labels (y) for train and test
         X_train = [peptide_to_indices(p) for p, _, _ in train_data]
         y_train = [label for _, _, label in train_data]
@@ -123,82 +121,34 @@ def prepare_data(datasets):
         X_test = torch.tensor(X_test, dtype=torch.long)
         y_test = torch.tensor(y_test, dtype=torch.long)
         
-        print(f"{allele} X_train shape:", X_train.shape)
-        print(f"{allele} y_train shape:", y_train.shape)
-        print(f"{allele} X_test shape:", X_test.shape)
-        print(f"{allele} y_test shape:", y_test.shape)
-        
-        # Check a sample
-        print(f"\n{allele} example input (peptide indices):", X_train[0])
-        print(f"{allele} corresponding label (binary):", y_train[0])
-        
         # Store processed data for this allele
         processed_datasets[allele] = (X_train, y_train, X_test, y_test)
+    summarize_processed_datasets(processed_datasets)
     return processed_datasets
 
+def peptide_to_indices(peptide):
+    """
+    Convert peptide (string of amino acids) to list of indices
+    """
+    return [AA_TO_IDX[aa] for aa in peptide]
 
-def save_dataset(processed_datasets):
+def summarize_processed_datasets(processed_datasets):
     """
-    Save processed datasets to files
-    
-    Parameters:
-    - processed_datasets: Dictionary of datasets by allele
-      Format: {allele_name: (X_train, y_train, X_test, y_test), ...}
+    Summarize processed tensor datasets into a Pandas DataFrame
     """
-    # Save each allele's dataset to a separate file
+    summary_data = []
+
     for allele, (X_train, y_train, X_test, y_test) in processed_datasets.items():
-        torch.save({
-            'X_train': X_train,
-            'y_train': y_train,
-            'X_test': X_test,
-            'y_test': y_test
-        }, f'saved_{allele}_dataset.pt')
-    
-    print("All datasets saved successfully!")
+        summary_data.append({
+            'Allele': allele,
+            'X_train shape': X_train.shape,
+            'y_train shape': y_train.shape,
+            'X_test shape': X_test.shape,
+            'y_test shape': y_test.shape,
+            'Example input (indices)': X_train[0].tolist(),
+            'Example label (binary)': y_train[0].item()
+        })
 
-
-def load_dataset(allele=None):
-    """
-    Load processed datasets from files
-    
-    Parameters:
-    - allele: If provided, load only this allele's dataset
-    
-    Returns:
-    - If allele specified: Tuple (X_train, y_train, X_test, y_test) for that allele
-    - If no allele specified: Dictionary of datasets by allele
-      Format: {allele_name: (X_train, y_train, X_test, y_test), ...}
-    """
-    if allele is not None:
-        try:
-            data = torch.load(f'saved_{allele}_dataset.pt')
-            return (
-                data['X_train'],
-                data['y_train'],
-                data['X_test'],
-                data['y_test']
-            )
-        except FileNotFoundError:
-            raise ValueError(f"No saved dataset found for allele {allele}")
-    
-    # Load all datasets
-    from constants import ALLELE_LABEL_MAP
-    alleles = [a for a in ALLELE_LABEL_MAP if a != "NEG"]
-    
-    all_datasets = {}
-    for allele in alleles:
-        try:
-            data = torch.load(f'saved_{allele}_dataset.pt')
-            all_datasets[allele] = (
-                data['X_train'],
-                data['y_train'],
-                data['X_test'],
-                data['y_test']
-            )
-        except FileNotFoundError:
-            print(f"Warning: No saved dataset found for allele {allele}")
-    
-    if not all_datasets:
-        raise FileNotFoundError("No saved datasets found")
-        
-    return all_datasets
+    summary_df = pd.DataFrame(summary_data)
+    print("Processed Dataset Summary:")
+    print(summary_df)

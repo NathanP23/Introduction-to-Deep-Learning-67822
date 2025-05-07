@@ -6,6 +6,8 @@ from pathlib import Path
 # Data configuration
 DATA_DIR = Path("Data/HLA_Dataset")
 MODELS_DIR = Path("Models")
+ALLELE_POSITIVE_FILES = [f for f in DATA_DIR.glob("*.txt") if "neg" not in f.name]
+NEGATIVE_FILE = DATA_DIR / "negs.txt"
 TRAIN_RATIO = 0.9
 
 # Model configuration
@@ -20,5 +22,3 @@ EPOCHS = 20
 BATCH_SIZE = 64
 LEARNING_RATE = 1e-3
 
-# Amino acid representation
-AMINO_ACIDS = 'ACDEFGHIKLMNPQRSTVWY'

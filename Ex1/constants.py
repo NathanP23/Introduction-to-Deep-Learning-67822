@@ -1,7 +1,6 @@
 # ================================
 #          constants.py
 # ================================
-from config import AMINO_ACIDS
 
 # Allele to label mapping
 ALLELE_LABEL_MAP = {
@@ -14,5 +13,12 @@ ALLELE_LABEL_MAP = {
     "NEG": 0
 }
 
+ALLELES = list(ALLELE_LABEL_MAP.keys())
+
+# Amino acid representation
+AMINO_ACIDS = 'ACDEFGHIKLMNPQRSTVWY'
+
 # Amino acid to index mapping
 AA_TO_IDX = {aa: i for i, aa in enumerate(AMINO_ACIDS)}
+
+
