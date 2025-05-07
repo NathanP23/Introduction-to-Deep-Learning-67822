@@ -3,8 +3,7 @@
 # ================================
 import torch
 import torch.nn as nn
-from config import PEPTIDE_LENGTH, NUM_AMINO_ACIDS, NUM_CLASSES, FC_HIDDEN_DIM, EMB_DIM, MODELS_DIR
-import os
+from config import PEPTIDE_LENGTH, NUM_AMINO_ACIDS, FC_HIDDEN_DIM, EMB_DIM
 
 
 class PeptideClassifier(nn.Module):

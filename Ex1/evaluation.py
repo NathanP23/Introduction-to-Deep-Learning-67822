@@ -3,7 +3,7 @@
 # ================================
 import plotly.graph_objects as go
 import plotly.offline as pyo
-
+import plotly.io as pio
 
 
 def plot_training_results(selected_allele, train_losses, test_losses, accuracies, pos_accuracies, neg_accuracies, epochs):
@@ -72,7 +72,8 @@ def plot_training_results(selected_allele, train_losses, test_losses, accuracies
         yaxis=dict(title="Loss", **axis_style),
         **layout_style
     )
-    pyo.iplot(fig_loss)
+    pio.renderers.default = 'notebook'
+    pio.show(fig_loss)
 
     
     # Accuracy Plot - updated to include per-class accuracy
@@ -118,7 +119,8 @@ def plot_training_results(selected_allele, train_losses, test_losses, accuracies
         yaxis=dict(title="Accuracy (%)", **axis_style),
         **layout_style
     )
-    pyo.iplot(fig_acc)
+    pio.renderers.default = 'notebook'
+    pio.show(fig_acc)
     
     
 import torch

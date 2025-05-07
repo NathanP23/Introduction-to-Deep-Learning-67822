@@ -1,8 +1,6 @@
 # ================================
 #          early_stopping.py
 # ================================
-import numpy as np
-
 class EarlyStopping:
     """
     Early stopping to prevent overfitting.
