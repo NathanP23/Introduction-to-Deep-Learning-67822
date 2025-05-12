@@ -23,8 +23,8 @@ class Decoder(nn.Module):
         c1,c2,c3 = base_c, base_c*2, base_c*4
         self.fc = nn.Linear(d_latent, c3*4*4)
         self.up = nn.Sequential(
-            deconv_bn_relu(c3, c2),   # 4→7
-            deconv_bn_relu(c2, c1),   # 7→14
+            deconv_bn_relu(c3, c2, op=0),   # 4→7
+            deconv_bn_relu(c2, c1, op=1),   # 7→14
             nn.ConvTranspose2d(c1, 1, 3, 2, 1, 1),
             nn.Sigmoid()
         )

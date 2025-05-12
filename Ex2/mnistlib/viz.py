@@ -11,5 +11,5 @@ def show_reconstructions(model, loader, n=8, device=None):
     for i in range(n):
         for row,img in enumerate([x[i,0], xr[i,0]]):
             axs[row,i].imshow(img, cmap="gray"); axs[row,i].axis("off")
-    axs[0,0].set_title("input"); axs[1,0].set_title("recon")
+    axs[0,0].set_title("input"); axs[1,0].set_title("reconstruction")
     plt.tight_layout()
