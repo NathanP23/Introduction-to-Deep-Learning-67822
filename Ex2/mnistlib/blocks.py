@@ -1,16 +1,16 @@
 # mnistlib/blocks.py
 from torch import nn
-
-def conv_bn_relu(in_c, out_c, k=3, s=2, p=1):
+def convolution_block_relu(in_channels, out_channels, kernel_size=3, stride=2, padding=1):
     return nn.Sequential(
-        nn.Conv2d(in_c, out_c, k, s, p, bias=False),
-        nn.BatchNorm2d(out_c),
+        nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=False),
+        nn.BatchNorm2d(out_channels),
         nn.ReLU(inplace=True)
     )
 
-def deconv_bn_relu(in_c, out_c, k=3, s=2, p=1, op=1):
+def deconvolution_block_relu(in_channels, out_channels, kernel_size=3, stride=2, padding=1, output_padding=1):
     return nn.Sequential(
-        nn.ConvTranspose2d(in_c, out_c, k, s, p, op, bias=False),
-        nn.BatchNorm2d(out_c),
+        nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding, output_padding, bias=False),
+        nn.BatchNorm2d(out_channels),
         nn.ReLU(inplace=True)
     )
+

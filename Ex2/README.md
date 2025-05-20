@@ -20,41 +20,6 @@ pip install -r requirements.txt
 ```bash
 jupyter notebook Ex2Sol.ipynb
 ```
-## 📦 Current Pipeline
-
-```
-        MNIST dataset (60k train / 10k test)
-                  │
-                  │  mnistlib/data.py: get_mnist_loaders()
-                  │
-                  ▼
-           DataLoader objects
-(train_loader, test_loader), batch=256
-                  │
-                  │───▶────┐
-                  │        │
-                  ▼        │
-          Autoencoder      │
-     mnistlib/ae.py: ConvAE│
-   ┌───────────────────────│────────────┐
-   │ Encoder               │ Decoder    │
-   │ (Conv layers)         │ (ConvTrans │
-   │ input → latent        │  layers)   │
-   │ vector                │ latent →   │
-   │                       │ output img │
-   └───────────────▲───────┴────────────┘
-                   │
-                   ▼
-         mnistlib/train.py: train_loop()
- (mean L1 Loss, Adam optimizer, epochs=10)
-                   │
-                   ▼
-         Trained Autoencoder Model
-                   │
-                   ▼
-  mnistlib/viz.py: show_reconstructions()
-          (visualize images)
-```
 
 ## 📦 Current network Architecture:
 ```
