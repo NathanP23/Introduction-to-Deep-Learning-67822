@@ -2,7 +2,6 @@
 import torch
 import torch.nn as nn
 import time
-import tqdm
 
 def train_autoencoder_model(autoencoder, train_dataloader, validation_dataloader,
                epochs=10, learning_rate=2e-3, weight_decay=0, device=None, 
