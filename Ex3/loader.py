@@ -1,6 +1,9 @@
 import torch
 # CODE_CHANGE: removed the following line to support newest python versions.
+################################################
 # from torchtext.legacy.data import Field
+################################################
+
 import torchtext as tx
 from torchtext.vocab import GloVe
 from torchtext.datasets import IMDB
