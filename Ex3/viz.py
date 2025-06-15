@@ -22,7 +22,7 @@ def plot_losses(log_data, model_name):
     for i, epoch in enumerate(epochs):
         if epoch != current_epoch:
             epoch_boundaries.append(i)
-            epoch_labels.append(f"Epoch {epoch}")
+            epoch_labels.append(f"Ep{epoch}")
             current_epoch = epoch
     
     # Set major ticks at epoch boundaries
@@ -39,7 +39,7 @@ def plot_losses(log_data, model_name):
     plt.ylim(0, 1)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(f"{model_name}_loss_plot.png")
+    plt.savefig(f"plots/{model_name}_loss_plot.png")
     plt.show()
 
 
@@ -86,8 +86,8 @@ def plot_losses_and_accuracy(log_data, model_name):
     if epoch_boundaries:
         for ax in [ax1, ax2]:
             ax.set_xticks(epoch_boundaries)
-            ax.set_xticklabels([f"Epoch {epochs[i]}" for i in epoch_boundaries])
+            ax.set_xticklabels([f"Ep{epochs[i]}" for i in epoch_boundaries])
     
     plt.tight_layout()
-    plt.savefig(f"{model_name}_loss_acc_plot.png")
+    plt.savefig(f"plots/{model_name}_loss_acc_plot.png")
     plt.show()
