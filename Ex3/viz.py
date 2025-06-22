@@ -1,5 +1,6 @@
-
 import matplotlib.pyplot as plt
+
+
 def plot_losses_and_accuracy(log_data, model_name):
     epochs = [entry["epoch"] for entry in log_data]
     train_losses = [entry["train_loss"] for entry in log_data]
